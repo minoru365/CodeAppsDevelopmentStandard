@@ -75,15 +75,15 @@
 
 | ドキュメント | 説明 | 対象フェーズ |
 |------------|------|------------|
+| **[DATAVERSE_TROUBLESHOOTING.md](./DATAVERSE_TROUBLESHOOTING.md)** | 🔌 **Dataverseトラブルシューティング完全ガイド**<br>- `databaseReferences` vs `connectionReferences`<br>- `dataSourceName`の手動修正方法<br>- 404エラー、Data source not found、データ取得エラーの全解決策<br>- 権限問題・デバッグ手順<br>- 実装チェックリスト | Phase 5: 初期セットアップ・エラー発生時 |
 | **[LOOKUP_FIELD_GUIDE.md](./LOOKUP_FIELD_GUIDE.md)** | 🔍 Lookupフィールド実装の完全ガイド<br>- ビュー切り替え機能<br>- `$expand`によるLookup展開<br>- 50以上のテストチェック項目 | Phase 5: データソース統合 |
 | **[DATAVERSE_SCHEMA_REFERENCE.md](./DATAVERSE_SCHEMA_REFERENCE.md)** | 📋 実際のスキーマリファレンス<br>- テーブル定義<br>- Choice値の完全リスト<br>- リレーション定義 | Phase 5: データソース統合 |
 | **[HOW_TO_GET_DATAVERSE_SCHEMA.md](./HOW_TO_GET_DATAVERSE_SCHEMA.md)** | 🔎 スキーマ取得方法の完全ガイド<br>- 5つの方法を比較<br>- 実践的なワークフロー | Phase 5: データソース統合前 |
 
-#### トラブルシューティング
+#### デバッグ
 
 | ドキュメント | 説明 | 使用タイミング |
 |------------|------|--------------|
-| **[DATAVERSE_TROUBLESHOOTING.md](./DATAVERSE_TROUBLESHOOTING.md)** | 🚨 一般的なエラーと解決方法<br>- データ取得エラー<br>- 権限問題<br>- 接続問題 | エラー発生時 |
 | **[DATAVERSE_DEBUG.md](./DATAVERSE_DEBUG.md)** | 🐛 デバッグ手順とログ確認方法 | デバッグ時 |
 
 #### 実装履歴（参考資料）
@@ -138,9 +138,10 @@
 ### Dataverseテーブルを追加したい
 
 1. **[メインREADME.md - Phase 5: データソース統合](../README.md#phase-5-機能拡張)** - 基本的な接続手順を確認
-2. **[HOW_TO_GET_DATAVERSE_SCHEMA.md](./HOW_TO_GET_DATAVERSE_SCHEMA.md)** - スキーマの取得方法を確認
-3. **[DATAVERSE_SCHEMA_REFERENCE.md](./DATAVERSE_SCHEMA_REFERENCE.md)** - 既存のスキーマ定義を参照
-4. 実装後 → **[DATAVERSE_TROUBLESHOOTING.md](./DATAVERSE_TROUBLESHOOTING.md)** で問題解決
+2. **[DATAVERSE_TROUBLESHOOTING.md](./DATAVERSE_TROUBLESHOOTING.md)** - 接続設定の詳細ガイド（404エラー対策、実装チェックリスト）
+3. **[HOW_TO_GET_DATAVERSE_SCHEMA.md](./HOW_TO_GET_DATAVERSE_SCHEMA.md)** - スキーマの取得方法を確認
+4. **[DATAVERSE_SCHEMA_REFERENCE.md](./DATAVERSE_SCHEMA_REFERENCE.md)** - 既存のスキーマ定義を参照
+5. 実装後・エラー発生時 → **[DATAVERSE_TROUBLESHOOTING.md](./DATAVERSE_TROUBLESHOOTING.md)** で問題解決
 
 ### Lookupフィールドを実装したい
 

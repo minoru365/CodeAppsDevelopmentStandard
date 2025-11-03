@@ -508,6 +508,29 @@ npm run build; npm run lint
 
 ---
 
+### ⚠️ 重要: Dataverseテーブル接続の注意点
+
+Dataverseテーブルを使用する場合、**特有の設定と注意点**があります。
+
+以下のエラーでお困りの場合は、専用ガイドを参照してください：
+
+- ❌ **404 "Resource not found"** エラー
+- ❌ **"Data source not found"** エラー
+- ❌ **"Failed to fetch projects"** エラー
+- ❌ Dataverseからデータが取得できない
+- ❌ 権限問題・テーブル名の問題
+
+**📖 詳細は [Dataverseトラブルシューティング完全ガイド](./docs/DATAVERSE_TROUBLESHOOTING.md) を参照してください。**
+
+このガイドでは以下を詳しく解説しています：
+
+- ✅ `databaseReferences` vs `connectionReferences` の違いと正しい設定方法
+- ✅ `dataSourceName`の手動修正方法（PAC CLIの既知の問題への対処）
+- ✅ 404エラー、"Data source not found"、データ取得エラーの全解決策
+- ✅ 権限問題、SDK初期化の問題、テーブル名の問題
+- ✅ デバッグ手順とよくあるエラーパターン
+- ✅ 実装チェックリスト（設定ファイル、生成ファイル、ビルド/デプロイ）
+
 ---
 
 ### Step 4: モックデータの削除とDataverseデータ統合
