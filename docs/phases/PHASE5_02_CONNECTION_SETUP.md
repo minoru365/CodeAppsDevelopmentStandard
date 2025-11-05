@@ -8,9 +8,84 @@
 
 ## Step 1: 接続IDの取得
 
-**Power Appsポータルで接続を作成し、URLから接続IDを取得します。**
+このStepでは、データソースへの接続方法を説明します。
 
-### 1-1. Power Appsポータルで接続を作成
+**接続方法は、コネクタータイプによって異なります:**
+
+| コネクター | 推奨方法 | 接続ID | 手順 |
+|-----------|---------|-------|------|
+| **Dataverse** | 簡潔なコマンド | ❌ 不要 | → **Step 1-A** |
+| Office 365 Users | 接続ID指定 | ✅ 必要 | → **Step 1-B** |
+| SQL Server | 接続ID指定 | ✅ 必要 | → **Step 1-B** |
+| その他 | 接続ID指定 | ✅ 必要 | → **Step 1-B** |
+
+---
+
+### Step 1-A: Dataverse接続（接続ID不要）⭐推奨
+
+Dataverseテーブルに接続する場合、**最も簡潔な方法**を使用できます。
+
+**手順:**
+
+1. **環境に認証（未実施の場合）**
+
+   ```powershell
+   pac auth create --environment "https://org123456.crm.dynamics.com"
+   ```
+
+2. **customization.xml を配置**
+   - Step 2で取得した `customization.xml` をワークスペースルートに配置
+
+3. **サービスクラス生成**
+
+   ```powershell
+   # 全テーブル生成
+   pac code add-data-source -a dataverse
+
+   # または特定のテーブルのみ
+   pac code add-data-source -a dataverse -t systemusers
+   pac code add-data-source -a dataverse -t geek_project_task
+   ```
+
+**コマンド説明:**
+
+- `-a dataverse`: `--connector shared_commondataserviceforapps` の短縮形
+- `-t {テーブル論理名}`: 特定のテーブルのみを生成（省略時は全テーブル）
+- `--connection-id` は不要（環境認証が自動使用される）
+
+**動作の仕組み:**
+
+- `pac auth create` で設定した環境認証が自動的に使用されます
+- Power Apps環境への接続は自動的に確立されます
+- 追加の接続設定は不要です
+
+**メリット:**
+
+- ✅ 接続ID取得の手間が不要
+- ✅ コマンドが短くシンプル
+- ✅ 環境認証が自動適用
+- ✅ 接続管理が簡単
+
+**従来の方法（非推奨）:**
+
+接続IDを指定する方法も使用できますが、手間が増えるため推奨されません：
+
+```powershell
+# 非推奨：接続IDを指定する方法
+pac code add-data-source `
+  --connector "shared_commondataserviceforapps" `
+  --connection-id "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+```
+
+> **💡 ヒント**: Dataverse開発では、`-a dataverse` を使った簡潔な方法を使用してください。
+
+---
+
+### Step 1-B: Office 365 Users / SQL Server / その他（接続ID必要）
+
+Office 365 UsersやSQL Serverなどのコネクターでは、**接続IDが必要**です。
+
+#### 1-B-1. Power Appsポータルで接続を作成
 
 1. **Power Apps Maker Portalにアクセス**
 
@@ -39,7 +114,7 @@
 
 ---
 
-### 1-2. URLから接続IDを取得 ⭐重要
+#### 1-B-2. URLから接続IDを取得 ⭐重要
 
 接続IDは**ブラウザのURLから直接取得**します。
 
@@ -67,7 +142,7 @@ a1b2c3d4-e5f6-7890-abcd-ef1234567890
 
 ---
 
-### 1-3. (代替方法) PAC CLIでの確認
+#### 1-B-3. (代替方法) PAC CLIでの確認
 
 コマンドラインで接続を確認することもできます:
 
@@ -85,23 +160,16 @@ pac connector list
 
 ---
 
-### 1-4. コネクター別の接続ID取得
+#### 1-B-4. コネクター別の接続ID取得
 
-#### Dataverse
-
-```text
-URL: .../connections/shared_commondataserviceforapps/{接続ID}/details
-API ID: shared_commondataserviceforapps
-```
-
-#### Office 365 Users
+**Office 365 Users:**
 
 ```text
 URL: .../connections/shared_office365users/{接続ID}/details
 API ID: shared_office365users
 ```
 
-#### SQL Server
+**SQL Server:**
 
 ```text
 URL: .../connections/shared_sql/{接続ID}/details
@@ -286,9 +354,16 @@ pac code add-data-source `
 
 ---
 
-## ✅ Step 1-2 完了チェックリスト
+## ✅ Step 1 完了チェックリスト
 
-### 接続ID取得
+### Dataverseの場合（Step 1-A）
+
+- [ ] `pac auth create` で環境に認証済み
+- [ ] customization.xmlをワークスペースルートに配置した
+- [ ] `pac code add-data-source -a dataverse` コマンドを実行した
+- [ ] サービスクラスが正常に生成された
+
+### その他のコネクター（Step 1-B）
 
 - [ ] Power Appsポータルで接続が作成されている
 - [ ] ブラウザのURLから接続IDをコピーした
@@ -306,7 +381,14 @@ pac code add-data-source `
 
 ## 🔗 次のステップ
 
-接続IDとスキーマの取得が完了したら、次は **[サービスクラス生成](./PHASE5_03_SERVICE_GENERATION.md)** に進みます。
+**Dataverseの場合（Step 1-A使用）:**
+
+- `pac code add-data-source -a dataverse` を実行すれば完了
+- そのまま **[モックデータからリアルデータへの移行](./PHASE5_04_MOCK_TO_REAL.md)** に進めます
+
+**その他のコネクター（Step 1-B使用）:**
+
+- 接続IDとスキーマの取得が完了したら、次は **[サービスクラス生成](./PHASE5_03_SERVICE_GENERATION.md)** に進みます
 
 ---
 

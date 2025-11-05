@@ -8,6 +8,12 @@
 
 ## Step 3: サービスクラスの生成
 
+> **📘 Dataverseユーザーへの注意**  
+> Dataverseを使用する場合、Phase 5の**Step 1-A**で既にサービスクラス生成が完了しています。
+> このStep 3は、**Office 365 UsersやSQL Serverなど、Step 1-Bを使用した場合のみ**必要です。
+
+---
+
 ### 3-1. データソース追加コマンド実行
 
 **基本コマンド:**
@@ -22,28 +28,34 @@ pac code add-data-source `
 
 ### 3-2. コネクター別のコマンド例
 
-#### Dataverse (全テーブル)
+#### Dataverse（参考）
+
+**推奨方法（接続ID不要）:**
+
+Step 1-Aで既に実行済みの場合はスキップしてください。
 
 ```powershell
+# 全テーブル生成
+pac code add-data-source -a dataverse
+
+# 特定のテーブルのみ
+pac code add-data-source -a dataverse -t systemusers
+pac code add-data-source -a dataverse -t geek_project_task
+```
+
+**従来の方法（非推奨）:**
+
+```powershell
+# 全テーブル生成
 pac code add-data-source `
   --connector "shared_commondataserviceforapps" `
   --connection-id "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-```
 
-#### Dataverse (特定のテーブルのみ)
-
-```powershell
-# SystemUsersテーブルのみ生成
+# 特定のテーブルのみ
 pac code add-data-source `
   --connector "shared_commondataserviceforapps" `
   --connection-id "a1b2c3d4-e5f6-7890-abcd-ef1234567890" `
   --table "systemusers"
-
-# カスタムテーブル (geek_project_task) を生成
-pac code add-data-source `
-  --connector "shared_commondataserviceforapps" `
-  --connection-id "a1b2c3d4-e5f6-7890-abcd-ef1234567890" `
-  --table "geek_project_task"
 ```
 
 #### Office 365 Users
