@@ -70,7 +70,68 @@ export const useTasks = () => {
 
 ## ⚠️ 重要な注意事項
 
-### **1. SDK初期化確認は必須**
+### 🔴 1. dataSourceName の手動修正（必須）
+
+**PAC CLIの既知の問題により、Dataverseでは必ず確認が必要です。**
+
+**確認手順:**
+
+```bash
+# Step 1: dataSourcesInfo.tsのキー名を確認
+cat .power/appschemas/dataSourcesInfo.ts
+# 出力例: 'crf38_taskses': { ... }
+
+# Step 2: サービスクラスのdataSourceNameを確認
+# src/generated/services/*Service.ts を開く
+
+# Step 3: 不一致なら修正
+# 例: 'Tasks' → 'crf38_taskses'
+```
+
+**不一致の場合:**
+
+```typescript
+// ❌ 生成されたコード（間違い）
+private static readonly dataSourceName = 'Tasks';
+
+// ✅ 修正後（dataSourcesInfo.tsのキーに合わせる）
+private static readonly dataSourceName = 'crf38_taskses';
+```
+
+修正後は必ず再ビルド: `npm run build && pac code push`
+
+> 💡 **なぜ必要？**  
+> SDKは `dataSourcesInfo[dataSourceName]` でデータソースを検索します。  
+> キーが一致しないと「Data source name: Tasks」エラーが発生します。
+
+詳細: [Phase 5 - Step 3](./docs/phases/PHASE5_03_SERVICE_GENERATION.md#3-6-ビルドとlint確認)
+
+---
+
+### 2. Power Apps SDKのAPI仕様（v0.3.x以降）
+
+現在のSDKでは、以下のプロパティ名を使用します：
+
+```typescript
+// ✅ 正しい（v0.3.x以降）
+const result = await service.retrieveMultipleRecords(...);
+if (result.success && result.data) {
+  console.log(result.data);
+}
+
+// ❌ 古い（ドキュメントに残っている場合あり）
+if (result.isSuccess && result.value) { ... }
+```
+
+| プロパティ | 旧 | 新（v0.3.x） |
+|-----------|-----|-------------|
+| 成功判定 | `isSuccess` | `success` |
+| データ | `value` | `data` |
+| エラー | `error` | `error` |
+
+---
+
+### 3. SDK初期化確認は必須
 
 すべてのサービス呼び出しの前に `isInitialized` チェックが必要です：
 
@@ -80,23 +141,16 @@ const { isInitialized } = usePowerPlatform();
 if (!isInitialized) return; // または早期リターン
 ```
 
-### **2. Dataverseの場合はスキーマファイルが必須**
+---
+
+### 4. Dataverseの場合はスキーマファイルが必須
 
 - ワークスペースルートに `customization.xml` を配置
 - 詳細: [接続セットアップ](./docs/phases/PHASE5_02_CONNECTION_SETUP.md)
 
-### **3. dataSourceNameの手動修正が必要**
+---
 
-PAC CLIの既知の問題により、生成後に手動修正が必要です：
-
-```typescript
-// src/generated/services/YourService.ts
-dataSourceName = 'correct_table_name'; // 複数形に修正
-```
-
-詳細: [サービスクラス生成](./docs/phases/PHASE5_03_SERVICE_GENERATION.md)
-
-### **4. トラブルシューティング**
+### 5. トラブルシューティング
 
 エラーが発生した場合は以下を参照：
 

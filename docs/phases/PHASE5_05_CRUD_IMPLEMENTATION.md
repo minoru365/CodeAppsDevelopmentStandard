@@ -6,6 +6,14 @@
 
 ---
 
+> **📌 SDK APIバージョン**  
+> このドキュメントは **Power Apps SDK v0.3.x** を使用しています。
+>
+> - 成功判定: `result.success` ✅ (旧: `result.success` ❌)
+> - データ取得: `result.data` ✅ (旧: `result.data` ❌)
+
+---
+
 ## CRUD操作の基本
 
 ### 基本パターン
@@ -14,7 +22,7 @@
 // すべての操作でIOperationResultを返す
 const result = await ServiceClass.operation();
 
-if (result.isSuccess) {
+if (result.success) {
   // 成功時の処理
 } else {
   // エラー処理
@@ -40,9 +48,9 @@ async function createUser() {
 
   const result = await SystemUsersService.create(newUser);
 
-  if (result.isSuccess && result.value) {
-    console.log('作成成功。新しいID:', result.value);
-    return result.value; // 新しいレコードのID
+  if (result.success && result.data) {
+    console.log('作成成功。新しいID:', result.data);
+    return result.data; // 新しいレコードのID
   } else {
     console.error('作成失敗:', result.error);
     throw new Error(result.error?.message || '作成に失敗しました');
@@ -70,10 +78,10 @@ export const useSystemUsers = () => {
 
       const result = await SystemUsersService.create(data);
 
-      if (result.isSuccess && result.value) {
+      if (result.success && result.data) {
         // 作成成功後、リストを再取得
         await loadUsers();
-        return result.value;
+        return result.data;
       } else {
         throw new Error(result.error?.message || '作成に失敗しました');
       }
@@ -104,8 +112,8 @@ const result = await SystemUsersService.getAll({
   top: 100
 });
 
-if (result.isSuccess && result.value) {
-  console.log('取得成功:', result.value);
+if (result.success && result.data) {
+  console.log('取得成功:', result.data);
 }
 ```
 
@@ -118,8 +126,8 @@ const result = await SystemUsersService.getById(userId, {
   select: ['systemuserid', 'fullname', 'internalemailaddress']
 });
 
-if (result.isSuccess && result.value) {
-  console.log('ユーザー:', result.value);
+if (result.success && result.data) {
+  console.log('ユーザー:', result.data);
 }
 ```
 
@@ -159,7 +167,7 @@ async function updateUser(userId: string) {
 
   const result = await SystemUsersService.update(userId, updates);
 
-  if (result.isSuccess) {
+  if (result.success) {
     console.log('更新成功');
   } else {
     console.error('更新失敗:', result.error);
@@ -185,7 +193,7 @@ export const useSystemUsers = () => {
 
       const result = await SystemUsersService.update(userId, data);
 
-      if (result.isSuccess) {
+      if (result.success) {
         // 更新成功後、リストを再取得
         await loadUsers();
       } else {
@@ -214,7 +222,7 @@ export const useSystemUsers = () => {
 async function deleteUser(userId: string) {
   const result = await SystemUsersService.delete(userId);
 
-  if (result.isSuccess) {
+  if (result.success) {
     console.log('削除成功');
   } else {
     console.error('削除失敗:', result.error);
@@ -240,7 +248,7 @@ export const useSystemUsers = () => {
 
       const result = await SystemUsersService.delete(userId);
 
-      if (result.isSuccess) {
+      if (result.success) {
         // 削除成功後、リストを再取得
         await loadUsers();
       } else {
@@ -293,8 +301,8 @@ export const useSystemUsers = () => {
         orderBy: 'fullname asc'
       });
 
-      if (result.isSuccess && result.value) {
-        setUsers(result.value);
+      if (result.success && result.data) {
+        setUsers(result.data);
       } else {
         throw new Error(result.error?.message || '取得に失敗しました');
       }
@@ -316,9 +324,9 @@ export const useSystemUsers = () => {
     try {
       const result = await SystemUsersService.create(data);
 
-      if (result.isSuccess && result.value) {
+      if (result.success && result.data) {
         await loadUsers();
-        return result.value;
+        return result.data;
       } else {
         throw new Error(result.error?.message || '作成に失敗しました');
       }
@@ -341,7 +349,7 @@ export const useSystemUsers = () => {
     try {
       const result = await SystemUsersService.update(userId, data);
 
-      if (result.isSuccess) {
+      if (result.success) {
         await loadUsers();
       } else {
         throw new Error(result.error?.message || '更新に失敗しました');
@@ -365,7 +373,7 @@ export const useSystemUsers = () => {
     try {
       const result = await SystemUsersService.delete(userId);
 
-      if (result.isSuccess) {
+      if (result.success) {
         await loadUsers();
       } else {
         throw new Error(result.error?.message || '削除に失敗しました');
@@ -438,3 +446,4 @@ export const useSystemUsers = () => {
 - [モックデータからリアルデータへの移行](./PHASE5_04_MOCK_TO_REAL.md)
 - [UI統合とコンポーネント](./PHASE5_06_UI_INTEGRATION.md)
 - [実装例](./PHASE5_07_EXAMPLES.md)
+

@@ -6,6 +6,14 @@
 
 ---
 
+> **📌 SDK APIバージョン**  
+> このドキュメントは **Power Apps SDK v0.3.x** を使用しています。
+>
+> - 成功判定: `result.success` ✅ (旧: `result.isSuccess` ❌)
+> - データ取得: `result.data` ✅ (旧: `result.value` ❌)
+
+---
+
 ## Step 4: データ統合の実装
 
 ### 4-1. カスタムフックの作成
@@ -44,8 +52,8 @@ export const useSystemUsers = () => {
       });
       
       // ✅ IOperationResult で型安全なエラーハンドリング
-      if (result.isSuccess && result.value) {
-        setUsers(result.value);
+      if (result.success && result.data) {
+        setUsers(result.data);
       } else {
         throw new Error(result.error?.message || 'ユーザー一覧の取得に失敗しました');
       }
@@ -240,8 +248,8 @@ if (!isInitialized) {
 const result = await SystemUsersService.getAll();
 
 // ✅ 型安全なエラーハンドリング
-if (result.isSuccess && result.value) {
-  setData(result.value);
+if (result.success && result.data) {
+  setData(result.data);
 } else {
   console.error(result.error);
   setError(result.error?.message || 'エラーが発生しました');
@@ -301,12 +309,12 @@ export function App() {
 ```typescript
 // ❌ 悪い例
 const result = await SystemUsersService.getAll();
-setUsers(result.value);  // result.valueがundefinedの可能性
+setUsers(result.data);  // result.dataがundefinedの可能性
 
 // ✅ 良い例
 const result = await SystemUsersService.getAll();
-if (result.isSuccess && result.value) {
-  setUsers(result.value);
+if (result.success && result.data) {
+  setUsers(result.data);
 } else {
   setError(result.error?.message || 'データ取得に失敗しました');
 }

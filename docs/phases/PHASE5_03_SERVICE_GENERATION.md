@@ -12,6 +12,8 @@
 > Dataverseを使用する場合、Phase 5の**Step 1-A**で既にサービスクラス生成が完了しています。
 > このStep 3は、**Office 365 UsersやSQL Serverなど、Step 1-Bを使用した場合のみ**必要です。
 
+> **🔴 重要:** Dataverse接続では [dataSourceNameの確認](../../PHASE5_DATA_INTEGRATION.md#-1-datasourcename-の手動修正必須) が必須です。
+
 ---
 
 ### 3-1. データソース追加コマンド実行
