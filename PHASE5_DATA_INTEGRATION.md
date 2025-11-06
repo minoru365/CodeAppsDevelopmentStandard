@@ -41,26 +41,36 @@
 1. **接続作成** - Power Appsポータルでコネクター接続を手動作成
 2. **接続ID取得** - ブラウザURLから接続IDをコピー
 3. **サービスクラス生成** - `pac code add-data-source` でTypeScript型定義を自動生成
-4. **SDK初期化確認** - `usePowerPlatform().isInitialized` でPower Apps SDK初期化を確認
+4. **PowerProvider設定** - `PowerProvider`コンポーネントでSDK初期化を管理
 5. **カスタムフック作成** - ビジネスロジックをカプセル化（CRUD操作）
 6. **UI統合** - Reactコンポーネントでデータを表示・操作
-7. **エラーハンドリング** - `IOperationResult.isSuccess` でエラー処理
+7. **エラーハンドリング** - `IOperationResult.success` でエラー処理
 
 ### **最小構成のコード例:**
 
 ```typescript
+// PowerProvider例（main.tsx）
+import PowerProvider from './components/PowerProvider';
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <PowerProvider>
+      <App />
+    </PowerProvider>
+  </React.StrictMode>
+);
+
 // カスタムフック例
 export const useTasks = () => {
-  const { isInitialized } = usePowerPlatform();
   const [tasks, setTasks] = useState([]);
 
   useEffect(() => {
-    if (!isInitialized) return;
-    
     TasksService.getAll().then(result => {
-      if (result.isSuccess) setTasks(result.value);
+      if (result.success && result.data) {
+        setTasks(result.data);
+      }
     });
-  }, [isInitialized]);
+  }, []);
 
   return { tasks };
 };
@@ -131,15 +141,30 @@ if (result.isSuccess && result.value) { ... }
 
 ---
 
-### 3. SDK初期化確認は必須
+### 3. PowerProvider による自動初期化
 
-すべてのサービス呼び出しの前に `isInitialized` チェックが必要です：
+`PowerProvider`コンポーネントがSDK初期化を自動的に管理します：
 
 ```typescript
-const { isInitialized } = usePowerPlatform();
+// main.tsx または App.tsx のルート
+import PowerProvider from './components/PowerProvider';
 
-if (!isInitialized) return; // または早期リターン
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <PowerProvider>
+      <App />
+    </PowerProvider>
+  </React.StrictMode>
+);
 ```
+
+> **💡 重要**  
+> `PowerProvider`を使用することで、カスタムフックやコンポーネント内で`usePowerPlatform().isInitialized`チェックは不要になります。  
+> SDKは`PowerProvider`の`useEffect`内で自動初期化されます。
+
+詳細: [Phase 1 - プロジェクトセットアップ](./PHASE1_PROJECT_SETUP.md#power-provider-の実装)
+
+詳細: [Phase 1 - プロジェクトセットアップ](./PHASE1_PROJECT_SETUP.md#power-provider-の実装)
 
 ---
 

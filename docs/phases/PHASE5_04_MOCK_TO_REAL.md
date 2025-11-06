@@ -22,23 +22,15 @@
 
 ```typescript
 import { useState, useEffect, useCallback } from 'react';
-import { usePowerPlatform } from '@microsoft/power-apps';
 import { SystemUsersService } from '../generated/services/SystemUsersService';
 import type { SystemUsers } from '../generated/models/SystemUsersModel';
 
 export const useSystemUsers = () => {
-  const { isInitialized } = usePowerPlatform();
   const [users, setUsers] = useState<SystemUsers[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const loadUsers = useCallback(async () => {
-    // ❌ SDK初期化前は実行しない
-    if (!isInitialized) {
-      console.warn('Power Apps SDK not initialized yet');
-      return;
-    }
-
     try {
       setLoading(true);
       setError(null);
@@ -64,24 +56,25 @@ export const useSystemUsers = () => {
     } finally {
       setLoading(false);
     }
-  }, [isInitialized]);
+  }, []);
 
-  // SDK初期化完了後に自動でデータ取得
+  // コンポーネントマウント時に自動でデータ取得
   useEffect(() => {
-    if (isInitialized) {
-      loadUsers();
-    }
-  }, [isInitialized, loadUsers]);
+    loadUsers();
+  }, [loadUsers]);
 
   return { 
     users, 
     loading, 
     error, 
-    refetch: loadUsers,
-    isInitialized 
+    refetch: loadUsers
   };
 };
 ```
+
+> **💡 SDK初期化について**  
+> Power Apps SDKの初期化は`PowerProvider`が自動的に行うため、カスタムフック内で初期化チェックは不要です。  
+> `PowerProvider`で`initialize()`が完了してからアプリが表示されるため、すべてのフックやコンポーネントでSDKを安全に使用できます。
 
 ---
 
@@ -93,17 +86,7 @@ export const useSystemUsers = () => {
 import { useSystemUsers } from '../hooks/useSystemUsers';
 
 export function UserList() {
-  const { users, loading, error, refetch, isInitialized } = useSystemUsers();
-
-  // SDK初期化待ち
-  if (!isInitialized) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <span className="ml-3">Power Apps SDK 初期化中...</span>
-      </div>
-    );
-  }
+  const { users, loading, error, refetch } = useSystemUsers();
 
   // ローディング状態
   if (loading) {
@@ -173,25 +156,9 @@ export function UserList() {
 **ファイルパス:** `src/App.tsx`
 
 ```typescript
-import { usePowerPlatform } from '@microsoft/power-apps';
 import { UserList } from './components/UserList';
 
 export function App() {
-  const { isInitialized } = usePowerPlatform();
-
-  // ✅ SDK初期化完了まで待機
-  if (!isInitialized) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">アプリケーション初期化中...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // ✅ 初期化完了後にアプリ本体を表示
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow">
@@ -209,6 +176,10 @@ export function App() {
   );
 }
 ```
+
+> **💡 SDK初期化について**  
+> `PowerProvider`がSDK初期化を管理するため、`App.tsx`で初期化チェックは不要です。  
+> アプリ全体が`PowerProvider`でラップされ、初期化完了後に表示されます。
 
 ---
 
@@ -228,19 +199,24 @@ Remove-Item -Recurse -Force src/data/
 
 ## 💡 重要なパターン
 
-### パターン1: SDK初期化チェック
+### パターン1: PowerProviderによる自動初期化
 
 ```typescript
-const { isInitialized } = usePowerPlatform();
+// PowerProvider が SDK の初期化を管理
+// main.tsx または App.tsx のルートで使用
+import PowerProvider from './components/PowerProvider';
 
-// ✅ 常にチェック
-if (!isInitialized) {
-  return <div>初期化中...</div>;
-}
-
-// ❌ チェックなしで呼び出さない
-// const result = await SystemUsersService.getAll(); // エラー発生
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <PowerProvider>
+      <App />
+    </PowerProvider>
+  </React.StrictMode>
+);
 ```
+
+> **💡 重要**  
+> `PowerProvider`がSDK初期化を行うため、カスタムフックやコンポーネント内で`usePowerPlatform().isInitialized`チェックは不要です。
 
 ### パターン2: IOperationResultでのエラーハンドリング
 
@@ -272,36 +248,26 @@ try {
 
 ## ⚠️ よくある間違い
 
-### 間違い1: 初期化チェックなし
+### 間違い1: PowerProviderの使用忘れ
 
 ```typescript
-// ❌ 悪い例
-export function App() {
-  const [data, setData] = useState([]);
+// ❌ 悪い例 - PowerProvider なし
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
 
-  useEffect(() => {
-    // SDK初期化前に呼び出される可能性がある
-    loadData();
-  }, []);
+// ✅ 良い例 - PowerProvider で SDK 初期化
+import PowerProvider from './components/PowerProvider';
 
-  return <div>{data.map(...)}</div>;
-}
-
-// ✅ 良い例
-export function App() {
-  const { isInitialized } = usePowerPlatform();
-  const [data, setData] = useState([]);
-
-  useEffect(() => {
-    if (isInitialized) {  // ✅ 初期化チェック
-      loadData();
-    }
-  }, [isInitialized]);
-
-  if (!isInitialized) return <div>初期化中...</div>;
-
-  return <div>{data.map(...)}</div>;
-}
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <PowerProvider>
+      <App />
+    </PowerProvider>
+  </React.StrictMode>
+);
 ```
 
 ### 間違い2: エラーハンドリングなし
@@ -326,7 +292,7 @@ if (result.success && result.data) {
 // ❌ 悪い例
 const loadData = async () => {
   const result = await fetchData();
-  setData(result.value);
+  setData(result.data);
   // loadingがtrueのまま
 };
 
@@ -335,7 +301,9 @@ const loadData = async () => {
   try {
     setLoading(true);
     const result = await fetchData();
-    setData(result.value);
+    if (result.success && result.data) {
+      setData(result.data);
+    }
   } finally {
     setLoading(false);  // ✅ 必ず終了
   }
@@ -346,17 +314,21 @@ const loadData = async () => {
 
 ## ✅ Step 4 完了チェックリスト
 
+### PowerProvider設定
+
+- [ ] `PowerProvider`コンポーネントが作成されている
+- [ ] `main.tsx`または`App.tsx`のルートで`PowerProvider`を使用している
+- [ ] `initialize()`が`useEffect`内で正しく呼び出されている
+
 ### カスタムフック
 
 - [ ] カスタムフックが作成されている
-- [ ] `usePowerPlatform().isInitialized`を使用している
 - [ ] `IOperationResult`でエラーハンドリングしている
 - [ ] ローディング状態を管理している
 - [ ] エラー状態を管理している
 
 ### コンポーネント
 
-- [ ] SDK初期化待ちの表示がある
 - [ ] ローディング表示がある
 - [ ] エラー表示がある
 - [ ] データが正しく表示される

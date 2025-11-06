@@ -208,56 +208,40 @@ export default defineConfig({
 **ファイルパス:** `src/PowerProvider.tsx`
 
 **取得元:**
-- Microsoft公式リポジトリ: [PowerProvider.tsx](https://github.com/microsoft/PowerAppsCodeApps/blob/main/docs/assets/PowerProvider.tsx)
+- 公式GitHubサンプル: [HelloWorld](https://github.com/microsoft/PowerAppsCodeApps/tree/main/samples/HelloWorld), [StaticAssetTracker](https://github.com/microsoft/PowerAppsCodeApps/tree/main/samples/StaticAssetTracker)
 
 **PowerProviderの役割:**
 1. **Power Apps SDKの初期化**
-   - `PowerDataRuntime`の初期化
-   - コネクター接続の準備
-   - 認証状態の管理
+   - `initialize()`関数でSDKを初期化
+   - アプリケーション起動時に一度だけ実行
 
 2. **初期化状態の管理**
-   - ローディング状態の表示
    - エラーハンドリング
    - 初期化完了後のアプリ表示
 
-3. **コンテキストの提供**
-   - 子コンポーネントへのSDKアクセス
-   - データソース接続の共有
-
 **基本構造:**
 ```typescript
-import { createContext, useEffect, useState } from 'react';
+import { initialize } from "@microsoft/power-apps/app";
+import { useEffect, type ReactNode } from "react";
 
-export const PowerContext = createContext<PowerDataRuntime | null>(null);
+interface PowerProviderProps {
+    children: ReactNode;
+}
 
-export default function PowerProvider({ children }: { children: React.ReactNode }) {
-  const [powerRuntime, setPowerRuntime] = useState<PowerDataRuntime | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
+export default function PowerProvider({ children }: PowerProviderProps) {
+    useEffect(() => {
+        const initApp = async () => {
+            try {
+                await initialize();
+                console.log('Power Apps SDK initialized successfully');
+            } catch (error) {
+                console.error('Power Apps SDK initialization failed:', error);
+            }
+        };
+        initApp();
+    }, []);
 
-  useEffect(() => {
-    // Power Apps SDK初期化ロジック
-    const initialize = async () => {
-      try {
-        const runtime = await initializePowerDataRuntime();
-        setPowerRuntime(runtime);
-        setIsInitialized(true);
-      } catch (error) {
-        console.error('Power Apps SDK initialization failed:', error);
-      }
-    };
-    initialize();
-  }, []);
-
-  if (!isInitialized) {
-    return <div>Loading Power Apps SDK...</div>;
-  }
-
-  return (
-    <PowerContext.Provider value={powerRuntime}>
-      {children}
-    </PowerContext.Provider>
-  );
+    return <>{children}</>;
 }
 ```
 
